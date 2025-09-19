@@ -10,7 +10,7 @@ Welcome to the **MY_SQL_CAPESTONE_PROJECT** – a hands-on database capstone foc
 
 ## 🏆 Highlights
 
-- **15+ fully structured SQL tables**
+- **20+ fully structured SQL tables**
 - **Advanced foreign key relationships and normalization**
 - **Realistic sample data: eco-sites, tribes, tourism, waste tracking**
 - **Smart Waste Management System module**
