@@ -1,6 +1,6 @@
-USE SQL_CAPESTONE_PROJECT  ;
+USE SQL_CAPESTONE_PROJECT ;
 
--- JOINS PART
+-- JOINS PART for all tables 
 -- 1. List all eco-sites and the tribes associated with each site.
 select site_name,state_region,type,tribe_name,population_estimate FROM ECO_SITES e
 left join tribes t on e.site_id =t.site_id;
@@ -124,91 +124,185 @@ left join tribes t on i.tribe_id =t.tribe_id
 left join eco_sites e on i.site_id =e.site_id;
 
 -- 21. Show collection trucks with truck number, status, site, and tribe.  
--- (collection_trucks JOIN eco_sites JOIN tribes)
 
-22. Display waste transfer logs with truck, site, center, and transfer date.  
--- (waste_transfer_logs JOIN collection_trucks JOIN eco_sites JOIN recycling_centers)
+select truck_number,status,site_name,tribe_name from collection_trucks c
+left join tribes t on c.tribe_id =t.tribe_id
+left join eco_sites e on c.site_id=e.site_id ;
 
-23. List all tribes with their traditional knowledge practices and benefits.  
--- (tribes JOIN traditional_knowledge)
+-- 22. Display waste transfer logs with truck, site, center, and transfer date.  
 
-24. Show all package bookings with the relevant eco-site and total amount.  
--- (booking_history JOIN eco_sites JOIN package_types)
+with trucks_eco_recycle as (
+select truck_id,truck_number,site_name,center_name from collection_trucks c
+inner join eco_sites e on c.site_id=e.site_id
+inner join recycling_centers r on e.site_id=r.site_id
+) 
+select transfer_id,weight_tons,transfer_status,truck_number,site_name,center_name 
+from waste_transfer_logs w
+left join trucks_eco_recycle t on  w.truck_id=t.truck_id ;
 
-25. Show feedback for each booking with site and package details.  
--- (tourist_feedback JOIN booking_history JOIN eco_sites JOIN package_types)
+-- 23. List all tribes with their traditional knowledge practices and benefits.  
 
-26. List all workshops conducted at sites with target audience and site region.  
--- (cultural_workshops JOIN eco_sites)
+select tribe_name,roles,population_estimate ,practice_name,eco_benefit from tribes
+inner join traditional_knowledge
+using (tribe_id);
 
-27. Show eco-sites with the number of associated conservation areas.  
--- (eco_sites LEFT JOIN conservation_areas)
+-- 24.  Show eco-sites with the number of associated conservation areas.  
 
-28. List all tribes, their population, and the number of artisans belonging to each.  
--- (tribes LEFT JOIN local_artisians)
+select site_name,area_name as conservation_area from eco_sites 
+left join conservation_areas using (site_id);
 
-29. Display all waste categories and the number of waste items logged per category.  
--- (waste_category LEFT JOIN waste_items)
+-- 25 . List all tribes, their population, and the number of artisans belonging to each.  
 
-30. Show all reforestation logs with the name of the tribe involved.  
--- (reforestation_logs JOIN tribes)
+select * from tribes  left join local_artisians using (tribe_id);
 
-31. List all booking histories with the number of nights and the site region.  
--- (booking_history JOIN eco_lodges JOIN eco_sites)
+-- 26. . Display all waste categories and the number of waste items logged per category.  
 
-32. Show workshops along with the tribe responsible, if any (via site-tribe link).  
--- (cultural_workshops JOIN eco_sites JOIN tribes)
+select * from waste_category left join waste_items using (cat_id);
 
-33. Display all youth programs with the tribe and eco-site.  
--- (youth_awareness_programs JOIN eco_sites JOIN tribes)
+-- 27. Show all reforestation logs with the name of the tribe involved.  
 
-34. Show all eco-sites with their total revenue (from visitor_statistics).  
--- (eco_sites JOIN visitor_statistics)
+select trees_planted,species,area_hectares,survival_rate_pct,tribe_name 
+from reforestation_logs 
+left join tribes using (tribe_id);
 
-35. List every conservation area with the tribe name (if associated via site).  
--- (conservation_areas JOIN eco_sites JOIN tribes)
+-- 28. List all booking histories with the number of nights and the site region.  
 
-36. Show all eco-sites with number of unique tourist visitors (from visit_logs).  
--- (eco_sites JOIN visit_logs)
 
-37. Display all booking histories with associated waste generated (join on site).  
--- (booking_history JOIN eco_sites JOIN waste_items)
+select visitor_name,checkin_date,checkout_date,total_amount,site_name,lodge_name
+from booking_history 
+right join eco_lodges on booking_history.lodge_id = eco_lodges.lodge_id
+right join eco_sites on booking_history.site_id = eco_sites.site_id;
 
-38. List all workshops and the artisans who conduct them (via site and tribe).  
--- (cultural_workshops JOIN eco_sites JOIN tribes JOIN local_artisians)
+-- 29.  Show workshops along with the tribe responsible, if any (via site-tribe link).  
 
-39. Show all eco-lodges and the conservation area they are closest to (join on site).  
--- (eco_lodges JOIN conservation_areas)
+SELECT cw.workshop_name, es.site_name, t.tribe_name
+FROM cultural_workshops cw
+INNER JOIN eco_sites es ON cw.site_id = es.site_id
+LEFT JOIN tribes t ON es.site_id = t.site_id;
 
-40. Display all cultural assets with the local artisans who produce them (via tribe).  
--- (cultural_assets JOIN tribes JOIN local_artisians)
+-- 30 Display all youth programs with the tribe and eco-site.  
 
-41. List all waste transfers with the name of the recycling center and the site.  
--- (waste_transfer_logs JOIN recycling_centers JOIN eco_sites)
+SELECT yp.program_name, es.site_name, t.tribe_name
+FROM youth_awareness_programs yp
+INNER JOIN eco_sites es ON yp.site_id = es.site_id
+LEFT JOIN tribes t ON es.site_id = t.site_id;
 
-42. Show all eco-sites with the total number of reforestation trees planted.  
--- (eco_sites JOIN reforestation_logs)
+-- 31 Show all eco-sites with their total revenue (from visitor_statistics)
+  
+  SELECT es.site_name, vs.year, vs.total_revenue
+FROM eco_sites es
+INNER JOIN visitor_statistics vs ON es.site_id = vs.site_id;
 
-43. List all IoT bin sensors at sites with waste items logged by tribe.  
--- (iot_bin_sensors JOIN eco_sites JOIN tribes JOIN waste_items)
+-- 32. List every conservation area with the tribe name (from site)
+SELECT ca.area_name, es.site_name, t.tribe_name
+FROM conservation_areas ca
+INNER JOIN eco_sites es ON ca.site_id = es.site_id
+LEFT JOIN tribes t ON es.site_id = t.site_id;
 
-44. Display all eco-guides programs with the tribe providing the guides (via site).  
--- (eco_guides JOIN eco_sites JOIN tribes)
+-- 33. Show all eco-sites with number of unique tourist visitors (from visit_logs).  
+SELECT es.site_name, COUNT(DISTINCT vl.visitor_name) AS unique_visitors
+FROM eco_sites es
+RIGHT JOIN visit_logs vl ON es.site_id = vl.site_id
+GROUP BY es.site_name;
 
-45. List all booking histories along with feedback and the reforestation activity at the same site.  
--- (booking_history JOIN tourist_feedback JOIN reforestation_logs)
+-- 34 Display all booking histories with associated waste generated join on site
+select * from booking_history ; 
+SELECT bh.visitor_name, es.site_name, wi.item_name, wi.quantity_kg
+FROM booking_history bh
+INNER JOIN eco_sites es ON bh.site_id = es.site_id
+LEFT JOIN waste_items wi ON es.site_id = wi.site_id;
 
-46. Show all workshops, the site, and feedback from visitors who attended (via visit_logs).  
--- (cultural_workshops JOIN eco_sites JOIN visit_logs)
+-- 35  List all workshops and the artisans who conduct them (via site and tribe).  
 
-47. Display all waste items with the disposal method used (via category or other logic).  
--- (waste_items JOIN waste_category JOIN disposal_methods)
+SELECT cw.workshop_name, es.site_name, t.tribe_name, la.name AS artisan_name, la.craft_type
+FROM cultural_workshops cw
+INNER JOIN eco_sites es ON cw.site_id = es.site_id
+INNER JOIN tribes t ON es.site_id = t.site_id
+INNER JOIN local_artisians la ON t.tribe_id = la.tribe_id;
 
-48. Show all recycling centers and the trucks that delivered waste to them.  
--- (recycling_centers JOIN waste_transfer_logs JOIN collection_trucks)
+-- 36 Show all eco-lodges and the conservation area they are closest to (join on site).
 
-49. List all sites, the number of unique tribes, and number of workshops conducted.  
--- (eco_sites LEFT JOIN tribes LEFT JOIN cultural_workshops)
+SELECT el.lodge_name, ca.area_name, el.site_id
+FROM eco_lodges el
+LEFT JOIN conservation_areas ca ON el.site_id = ca.site_id;
 
-50. Display all site bookings with visitor statistics for that year (join on site and year).  
--- (booking_history JOIN eco_sites JOIN visitor_statistics)
+-- 37 Display all cultural assets with the local artisans who produce them 
+SELECT ca.asset_type, ca.description, t.tribe_name, la.name AS artisan_name, la.craft_type
+FROM cultural_assets ca
+INNER JOIN tribes t ON ca.tribe_id = t.tribe_id
+INNER JOIN local_artisians la ON t.tribe_id = la.tribe_id;
+
+-- 38 List all waste transfers with the name of the recycling center and the site.
+
+SELECT wt.transfer_id, rc.center_name, es.site_name, wt.transfer_date, wt.weight_tons
+FROM waste_transfer_logs wt
+INNER JOIN recycling_centers rc ON wt.center_id = rc.center_id
+INNER JOIN eco_sites es ON wt.site_id = es.site_id;
+
+-- 39 Show all eco-sites with the total number of reforestation trees planted.
+SELECT es.site_name, SUM(rl.trees_planted) AS total_trees
+FROM eco_sites es
+LEFT JOIN reforestation_logs rl ON es.site_id = rl.site_id
+GROUP BY es.site_name;
+
+-- 40 List all IoT bin sensors at sites with waste items logged by tribe.
+
+select * from iot_bin_sensors ; 
+select * from waste_items ;
+SELECT ibs.bin_location, es.site_name, t.tribe_name, wi.item_name, wi.quantity_kg
+FROM iot_bin_sensors ibs
+INNER JOIN eco_sites es ON ibs.site_id = es.site_id
+INNER JOIN tribes t ON ibs.tribe_id = t.tribe_id
+LEFT JOIN waste_items wi ON ibs.site_id = wi.site_id AND ibs.tribe_id = wi.tribe_id;
+
+-- 41. Display all eco-guides programs with the tribe providing the guides .
+
+SELECT eg.guide_program, es.site_name, t.tribe_name
+FROM eco_guides eg
+INNER JOIN eco_sites es ON eg.site_id = es.site_id
+LEFT JOIN tribes t ON es.site_id = t.site_id;
+
+-- 42. List all booking histories along with feedback and the reforestation activity at the same site.
+
+SELECT bh.visitor_name, tf.feedback_text, rl.year, rl.trees_planted, rl.species
+FROM booking_history bh
+INNER JOIN tourist_feedback tf ON bh.booking_id = tf.booking_id
+LEFT JOIN reforestation_logs rl ON bh.site_id = rl.site_id;
+
+-- 43. Show all workshops, the site, and feedback from visitors who attended (via visit_logs).
+
+SELECT cw.workshop_name, es.site_name, vl.visitor_name, vl.feedback
+FROM cultural_workshops cw
+INNER JOIN eco_sites es ON cw.site_id = es.site_id
+LEFT JOIN visit_logs vl ON cw.site_id = vl.site_id;
+
+-- 44.  Display all waste items with the disposal method used (via category or other logic).
+
+SELECT wi.item_name, wc.category_name, dm.method_name
+FROM waste_items wi
+INNER JOIN waste_category wc ON wi.cat_id = wc.cat_id
+LEFT JOIN disposal_methods dm ON wc.category_name = dm.method_name;
+
+-- 45. Show all recycling centers and the trucks that delivered waste to them.
+
+SELECT rc.center_name, ct.truck_number, wt.transfer_date, wt.weight_tons
+FROM recycling_centers rc
+INNER JOIN waste_transfer_logs wt ON rc.center_id = wt.center_id
+INNER JOIN collection_trucks ct ON wt.truck_id = ct.truck_id;
+
+-- 46. List all sites, the number of unique tribes, and number of workshops conducted.
+
+SELECT es.site_name, COUNT(DISTINCT t.tribe_id) AS tribe_count, COUNT(DISTINCT cw.c_id) AS workshop_count
+FROM eco_sites es
+LEFT JOIN tribes t ON es.site_id = t.site_id
+LEFT JOIN cultural_workshops cw ON es.site_id = cw.site_id
+GROUP BY es.site_name;
+
+-- 47. Display all site bookings with visitor statistics for that year (join on site and year).
+
+SELECT bh.visitor_name, es.site_name, bh.checkin_date, vs.year, vs.domestic_visitors, vs.foreign_visitors, vs.total_revenue
+FROM booking_history bh
+INNER JOIN eco_sites es ON bh.site_id = es.site_id
+LEFT JOIN visitor_statistics vs ON bh.site_id = vs.site_id AND YEAR(bh.checkin_date) = vs.year;
+
+
