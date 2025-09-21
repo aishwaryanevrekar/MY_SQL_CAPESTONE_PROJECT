@@ -1,4 +1,18 @@
 use sql_capestone_project ;
+/*
+8 tables 
+visitor statistics
+visit logs
+local_artisians 
+traditional knowledge
+eco_lodges
+conservation areas 
+cultural_workshops
+cultural assets
+
+
+
+*/
 -- 1. Write a function to return the total number of eco-sites in a given state.
 select * from eco_sites ;
 
@@ -134,6 +148,7 @@ where site_id=s_id and year=year1;
 return trees_plant ;
 end $$
 delimiter ;
+
 -- More Functions 
 
 -- 1. Write a function to return the total number of eco-sites in a given state.  -- eco_sites
@@ -387,8 +402,8 @@ DELIMITER ;
 select foreign_visitors(5,2022);
 
 
--- Table: eco_lodges
--- 21. Function to return the average price per night for a lodge site  -- eco_lodges
+-- 2. Table: eco_lodges
+-- 1. Function to return the average price per night for a lodge site  -- eco_lodges
 DELIMITER //
 create function avg_price(site int)
 returns decimal(50,2)
@@ -403,7 +418,7 @@ END //
 DELIMITER ;
 
 select avg_price(8);
--- 22. Function to return the lodge with the highest occupancy rate.  -- eco_lodges
+-- 2. Function to return the lodge with the highest occupancy rate.  -- eco_lodges
 DELIMITER //
 create function highest_occupancy_rate_lodge()
 returns varchar(100)
@@ -421,7 +436,7 @@ END //
 DELIMITER ;
 
 select highest_occupancy_rate_lodge();
--- 23. Function to return the number of rooms available at a lodge.  -- eco_lodges
+-- 3. Function to return the number of rooms available at a lodge.  -- eco_lodges
 
 DELIMITER //
 create function no_rooms_available(lodge int)
@@ -438,7 +453,7 @@ DELIMITER ;
 
 select no_rooms_available(1);
 
--- 24. Function to return the average guest rating for each lodge.  -- eco_lodges
+-- 4. Function to return the average guest rating for each lodge.  -- eco_lodges
 
 DELIMITER //
 create function highest_rating(lodge int)
@@ -455,7 +470,7 @@ DELIMITER ;
 
 select highest_rating(5);
 
--- 25. Function to return the lodge with the lowest price per night.  -- eco_lodges
+-- 5. Function to return the lodge with the lowest price per night.  -- eco_lodges
 
 DELIMITER //
 create function min_price_per_night()
@@ -474,7 +489,7 @@ END //
 DELIMITER ;
 
 select min_price_per_night();
--- 26. Function to return the number of unique bookings at a lodge.  -- eco_lodges
+-- 6. Function to return the number of unique bookings at a lodge.  -- eco_lodges
 
 DELIMITER //
 create function unique_bookings_lodge(lodge int)
@@ -490,7 +505,7 @@ END //
 DELIMITER ;
 
 select unique_bookings_lodge(1);
--- 27. Function to return the average length of stay at a lodge.  -- eco_lodges
+-- 7. Function to return the average length of stay at a lodge.  -- eco_lodges
 
 DELIMITER //
 create function min_stay_lodge(lodge int)
@@ -507,7 +522,7 @@ END //
 DELIMITER ;
 
 select min_stay_lodge(1);
--- 28. Function to return the lodge  type .  -- eco_lodges
+-- 8. Function to return the lodge  type .  -- eco_lodges
 
 DELIMITER //
 create function type_lodge(lodge int)
@@ -523,41 +538,1129 @@ END //
 DELIMITER ;
 
 select type_lodge(7);
-29. Function to return the number of lodges in a particular region.  -- eco_lodges
+
+-- TABLE 3. traditional_knowledge
+
+-- 1. Create a function  that returns the practice name.
 
 DELIMITER //
-create function highest_occupancy_rate_lodge()
+create function fn_get_practice_name(knowId INT)
 returns varchar(100)
 deterministic
 BEGIN 
-	declare foreign1 varchar(100);
-    select lodge_name into foreign1
-    from eco_lodges
-    where price_per_night =(
-    select max(price_per_night)
-    from eco_lodges
-    );
-    return foreign1 ;
+	declare NAME varchar(100);
+    select practice_name into NAME
+    from traditional_knowledge
+    where know_id = knowId;
+    return NAME ;
 END //
 DELIMITER ;
 
-select highest_occupancy_rate_lodge();
-30. Function to return the average number of bookings per month for a lodge.  -- eco_lodges
+select fn_get_practice_name(5);
 
+-- 2. Write a function  that returns the total number of traditional knowledge practices.
 DELIMITER //
-create function highest_occupancy_rate_lodge()
-returns varchar(100)
+create function fn_count_practices()
+returns INT
 deterministic
 BEGIN 
-	declare foreign1 varchar(100);
-    select lodge_name into foreign1
-    from eco_lodges
-    where price_per_night =(
-    select max(price_per_night)
-    from eco_lodges
-    );
-    return foreign1 ;
+	declare NAME INT;
+    select count(*) into NAME
+    from traditional_knowledge;
+    return NAME ;
 END //
 DELIMITER ;
 
-select highest_occupancy_rate_lodge();
+select fn_count_practices();
+
+-- 3. Create a function fn_check_practice_exists(knowId INT) that returns 1 if practice exists.
+
+DELIMITER //
+create function fn_check_practice_exists(knowId INT)
+returns INT
+deterministic
+BEGIN 
+	declare x INT default 0;
+    declare NAME1 varchar(100);
+    select practice_name into NAME1
+    from traditional_knowledge
+    where know_id = knowId
+    limit 1;
+    if NAME1 is not null
+    then 
+    set x = 1;
+    end if;
+    return x;
+END //
+DELIMITER ;
+
+select fn_check_practice_exists(1);
+
+-- 4. Write a function fn_longest_practice_name() that returns the longest practice name.
+
+DELIMITER //
+
+CREATE FUNCTION fn_biggest_practice_name()
+RETURNS VARCHAR(100)
+DETERMINISTIC
+BEGIN
+    DECLARE ans VARCHAR(100);
+
+    SELECT practice_name 
+    INTO ans
+    FROM traditional_knowledge
+    ORDER BY CHAR_LENGTH(practice_name) DESC
+    LIMIT 1;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+select fn_biggest_practice_name();
+
+-- 5. Create a function  that returns the shortest practice name.
+
+DELIMITER //
+
+CREATE FUNCTION fn_SHORT_practice_name()
+RETURNS VARCHAR(100)
+DETERMINISTIC
+BEGIN
+    DECLARE ans VARCHAR(100);
+
+    SELECT practice_name 
+    INTO ans
+    FROM traditional_knowledge
+    ORDER BY CHAR_LENGTH(practice_name) ASC
+    LIMIT 1;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+select fn_SHORT_practice_name();
+
+-- 6. Write a function  that returns average practice name length.
+
+DELIMITER //
+
+CREATE FUNCTION fn_avg_practice_name_length()
+RETURNS decimal(10,2)
+DETERMINISTIC
+BEGIN
+    DECLARE ans decimal(10,2);
+
+    SELECT avg(char_length(practice_name)) 
+    INTO ans
+    from traditional_knowledge;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+select fn_avg_practice_name_length();
+
+
+-- 7. Create a function  that returns average eco_benefit description length.
+DELIMITER //
+CREATE FUNCTION fn_avg_benefit_length()
+RETURNS decimal(10,2)
+DETERMINISTIC
+BEGIN
+    DECLARE ans decimal(10,2);
+
+    SELECT avg(char_length(eco_benefit)) INTO ans
+    from traditional_knowledge;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 8. t counts words in eco_benefit.
+
+DELIMITER //
+
+CREATE FUNCTION fn_benefit_word_count(pid INT)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE ans INT;
+
+    SELECT LENGTH(eco_benefit) - LENGTH(REPLACE(eco_benefit,' ','')) + 1
+    INTO ans
+    FROM traditional_knowledge
+    WHERE know_id = pid;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+-- 9.  returns the most frequent eco_benefit keyword.
+
+DELIMITER //
+
+CREATE FUNCTION fn_top_benefit100()
+RETURNS VARCHAR(255)
+DETERMINISTIC
+BEGIN
+    DECLARE ans VARCHAR(255);
+
+    SELECT eco_benefit 
+    INTO ans
+    FROM traditional_knowledge
+    GROUP BY eco_benefit
+    ORDER BY COUNT(*) DESC
+    LIMIT 1;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+SELECT fn_top_benefit100();
+
+-- 10. counts practices linked to a tribe.
+
+DELIMITER //
+
+CREATE FUNCTION fn_practice_count_by_tribe100(tid INT)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE ans INT;
+
+    SELECT COUNT(*) 
+    INTO ans
+    FROM traditional_knowledge
+    WHERE tribe_id = tid;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- table 4 : visit logs
+
+-- 1. Create a function fn_get_visitor_name(logId INT) that returns the visitor’s name by log ID.
+
+Write a function fn_count_visits() that returns the total number of visit logs.
+DELIMITER //
+
+CREATE FUNCTION fn_count_visits(tid INT)
+RETURNS varchar(50)
+DETERMINISTIC
+BEGIN
+    DECLARE ans varchar(50);
+
+    SELECT visitor_name 
+    INTO ans
+    FROM visit_logs
+    WHERE log_id = tid;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+select fn_count_visits(5);
+
+-- 2. Create a function  that returns the average rating across all logs.
+delimiter //
+CREATE FUNCTION fn_avg_rating()
+RETURNS int
+DETERMINISTIC
+BEGIN
+    DECLARE ans int;
+
+    SELECT avg(rating) 
+    INTO ans
+    FROM visit_logs;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 3. Write a function fn_max_rating() that returns the highest rating.
+delimiter //
+CREATE FUNCTION max_rating()
+RETURNS int
+DETERMINISTIC
+BEGIN
+    DECLARE ans int;
+
+    SELECT max(rating) 
+    INTO ans
+    FROM visit_logs;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 4.  returns the lowest rating.
+delimiter //
+CREATE FUNCTION min_rating()
+RETURNS int
+DETERMINISTIC
+BEGIN
+    DECLARE ans int;
+
+    SELECT min(rating) 
+    INTO ans
+    FROM visit_logs;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 5. Write a function fn_total_activities_done() that counts the number of activities across all logs.
+
+delimiter //
+CREATE FUNCTION count_activites()
+RETURNS int
+DETERMINISTIC
+BEGIN
+    DECLARE ans int;
+
+    SELECT count(*)
+    INTO ans
+    FROM visit_logs;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 6. Create a function fn_visit_feedback_length(logId INT) that returns the length of a visitor’s feedback.
+delimiter //
+CREATE FUNCTION fn_feedback_size(lid INT)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE ans INT;
+
+    SELECT CHAR_LENGTH(feedback)
+    INTO ans
+    FROM visit_logs
+    WHERE log_id = lid;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 7. Write a function fn_check_log_exists(logId INT) that returns 1 if a log exists, else 0.
+DELIMITER //
+
+CREATE FUNCTION fn_log_exist(lid INT)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE ans INT DEFAULT 0;
+
+    IF EXISTS (SELECT 1 FROM visit_logs WHERE log_id = lid) THEN
+        SET ans = 1;
+    END IF;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+
+-- 8. Create a function fn_latest_visit_date() that returns the most recent visit date.
+
+DELIMITER //
+
+CREATE FUNCTION fn_last_visit_date()
+RETURNS DATE
+DETERMINISTIC
+BEGIN
+    DECLARE ans DATE;
+
+    SELECT MAX(visit_date)
+    INTO ans
+    FROM visit_logs;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+
+-- 9. Write a function fn_earliest_visit_date() that returns the oldest visit date.
+
+DELIMITER //
+
+CREATE FUNCTION fn_first_visit_date()
+RETURNS DATE
+DETERMINISTIC
+BEGIN
+    DECLARE ans DATE;
+
+    SELECT MIN(visit_date)
+    INTO ans
+    FROM visit_logs;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- table 5 : local_artisians
+
+-- 1. Write a function fn_get_artist_name(artistId INT) that returns artisan’s name.
+DELIMITER //
+
+CREATE FUNCTION fn_artist_name(aid INT)
+RETURNS VARCHAR(100)
+DETERMINISTIC
+BEGIN
+    DECLARE ans VARCHAR(100);
+
+    SELECT name 
+    INTO ans
+    FROM local_artisians
+    WHERE artist_id = aid;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 2. Create a function fn_count_artisans() that returns total artisans.
+DELIMITER //
+
+CREATE FUNCTION fn_count_artists()
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE ans INT;
+
+    SELECT COUNT(*) 
+    INTO ans
+    FROM local_artisians;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 3. Write a function fn_check_artisan_exists(artistId INT) that returns 1 if artisan exists.
+DELIMITER //
+
+CREATE FUNCTION fn_artist_exist(aid INT)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE ans INT DEFAULT 0;
+
+    IF EXISTS (SELECT 1 FROM local_artisians WHERE artist_id = aid) THEN
+        SET ans = 1;
+    END IF;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 4. Create a function fn_craft_type(artistId INT) that returns craft type of artisan.
+DELIMITER //
+
+CREATE FUNCTION fn_artist_craft(aid INT)
+RETURNS VARCHAR(100)
+DETERMINISTIC
+BEGIN
+    DECLARE ans VARCHAR(100);
+
+    SELECT craft_type 
+    INTO ans
+    FROM local_artisians
+    WHERE artist_id = aid;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 5. Write a function fn_artisans_by_tribe(tribeId INT) that counts artisans linked to a tribe.
+DELIMITER //
+
+CREATE FUNCTION fn_artists_by_tribe(tid INT)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE ans INT;
+
+    SELECT COUNT(*) 
+    INTO ans
+    FROM local_artisians
+    WHERE tribe_id = tid;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 6. Create a function fn_longest_name_artisan() that returns the artisan with the longest name.
+DELIMITER //
+
+CREATE FUNCTION fn_longest_artist_name()
+RETURNS VARCHAR(100)
+DETERMINISTIC
+BEGIN
+    DECLARE ans VARCHAR(100);
+
+    SELECT name 
+    INTO ans
+    FROM local_artisians
+    ORDER BY CHAR_LENGTH(name) DESC
+    LIMIT 1;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 7. Write a function fn_shortest_name_artisan() that returns the artisan with the shortest name.
+DELIMITER //
+
+CREATE FUNCTION fn_shortest_artist_name()
+RETURNS VARCHAR(100)
+DETERMINISTIC
+BEGIN
+    DECLARE ans VARCHAR(100);
+
+    SELECT name 
+    INTO ans
+    FROM local_artisians
+    ORDER BY CHAR_LENGTH(name) ASC
+    LIMIT 1;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 8. Create a function fn_avg_name_length() that returns average artisan name length.
+DELIMITER //
+
+CREATE FUNCTION fn_avg_artist_name_size()
+RETURNS DECIMAL(10,2)
+DETERMINISTIC
+BEGIN
+    DECLARE ans DECIMAL(10,2);
+
+    SELECT AVG(CHAR_LENGTH(name)) 
+    INTO ans
+    FROM local_artisians;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 9. Write a function fn_avg_craft_length() that returns average craft type length.
+DELIMITER //
+
+CREATE FUNCTION fn_avg_craft_size()
+RETURNS DECIMAL(10,2)
+DETERMINISTIC
+BEGIN
+    DECLARE ans DECIMAL(10,2);
+
+    SELECT AVG(CHAR_LENGTH(craft_type)) 
+    INTO ans
+    FROM local_artisians;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+-- 10. Create a function fn_total_female_artisans() that counts female artisans.
+DELIMITER //
+
+CREATE FUNCTION fn_total_female_artists()
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE ans INT;
+
+    SELECT COUNT(*) 
+    INTO ans
+    FROM local_artisians
+    WHERE gender = 'F';
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- TABLE 6 : CONSERVATION_AREAS
+-- 1. Write a function fn_get_area_size(areaId INT) that returns the size (km²) of a conservation area.
+DELIMITER //
+
+CREATE FUNCTION fn_area_size(aid INT)
+RETURNS DECIMAL(10,2)
+DETERMINISTIC
+BEGIN
+    DECLARE ans DECIMAL(10,2);
+
+    SELECT area_size_km2
+    INTO ans
+    FROM conservation_areas
+    WHERE area_id = aid;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 2. Create a function fn_count_conservation_areas() that returns the total number of areas.
+DELIMITER //
+
+CREATE FUNCTION fn_count_areas()
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE ans INT;
+
+    SELECT COUNT(*)
+    INTO ans
+    FROM conservation_areas;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 3. Write a function fn_max_area_size() that returns the largest conservation area size.
+DELIMITER //
+
+CREATE FUNCTION fn_biggest_area_size()
+RETURNS DECIMAL(10,2)
+DETERMINISTIC
+BEGIN
+    DECLARE ans DECIMAL(10,2);
+
+    SELECT MAX(area_size_km2)
+    INTO ans
+    FROM conservation_areas;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 4. Create a function fn_min_area_size() that returns the smallest conservation area size.
+DELIMITER //
+
+CREATE FUNCTION fn_smallest_area_size()
+RETURNS DECIMAL(10,2)
+DETERMINISTIC
+BEGIN
+    DECLARE ans DECIMAL(10,2);
+
+    SELECT MIN(area_size_km2)
+    INTO ans
+    FROM conservation_areas;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 5. Write a function fn_avg_area_size() that returns the average area size.
+DELIMITER //
+
+CREATE FUNCTION fn_avg_area_size()
+RETURNS DECIMAL(10,2)
+DETERMINISTIC
+BEGIN
+    DECLARE ans DECIMAL(10,2);
+
+    SELECT AVG(area_size_km2)
+    INTO ans
+    FROM conservation_areas;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 6. Create a function fn_sum_area_size() that returns the total area size.
+DELIMITER //
+
+CREATE FUNCTION fn_total_area_size()
+RETURNS DECIMAL(15,2)
+DETERMINISTIC
+BEGIN
+    DECLARE ans DECIMAL(15,2);
+
+    SELECT SUM(area_size_km2)
+    INTO ans
+    FROM conservation_areas;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 7. Write a function fn_check_area_exists(areaId INT) that returns 1 if an area exists, else 0.
+DELIMITER //
+
+CREATE FUNCTION fn_area_exist(aid INT)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE ans INT DEFAULT 0;
+
+    IF EXISTS (SELECT 1 FROM conservation_areas WHERE area_id = aid) THEN
+        SET ans = 1;
+    END IF;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 8. Create a function fn_area_type(areaId INT) that returns the protection level of a conservation area.
+DELIMITER //
+
+CREATE FUNCTION fn_area_type(aid INT)
+RETURNS VARCHAR(100)
+DETERMINISTIC
+BEGIN
+    DECLARE ans VARCHAR(100);
+
+    SELECT protection_level
+    INTO ans
+    FROM conservation_areas
+    WHERE area_id = aid;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 9. Write a function fn_latest_area_created() that returns the most recently inserted area ID.
+DELIMITER //
+
+CREATE FUNCTION fn_latest_area_id()
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE ans INT;
+
+    SELECT MAX(area_id)
+    INTO ans
+    FROM conservation_areas;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 10. Create a function fn_shortest_area_name() that returns the name of the shortest-named conservation area.
+DELIMITER //
+
+CREATE FUNCTION fn_shortest_area_name()
+RETURNS VARCHAR(100)
+DETERMINISTIC
+BEGIN
+    DECLARE ans VARCHAR(100);
+
+    SELECT area_name
+    INTO ans
+    FROM conservation_areas
+    ORDER BY CHAR_LENGTH(area_name) ASC
+    LIMIT 1;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- tab;e 7 cultural assets
+-- 1.  returns the type of a cultural asset.
+DELIMITER //
+
+CREATE FUNCTION fn_asset_type(aid INT)
+RETURNS VARCHAR(100)
+DETERMINISTIC
+BEGIN
+    DECLARE ans VARCHAR(100);
+
+    SELECT asset_type 
+    INTO ans
+    FROM cultural_assets
+    WHERE asset_id = aid;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 2.  description of a cultural asset.
+DELIMITER //
+
+CREATE FUNCTION fn_asset_desc(aid INT)
+RETURNS TEXT
+DETERMINISTIC
+BEGIN
+    DECLARE ans TEXT;
+
+    SELECT description 
+    INTO ans
+    FROM cultural_assets
+    WHERE asset_id = aid;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 3. Write a function fn_count_assets() that returns the total number of cultural assets.
+DELIMITER //
+
+CREATE FUNCTION fn_count_assets()
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE ans INT;
+
+    SELECT COUNT(*) 
+    INTO ans
+    FROM cultural_assets;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 4. Create a function fn_assets_by_tribe(tribeId INT) that counts assets linked to a tribe.
+DELIMITER //
+
+CREATE FUNCTION fn_assets_by_tribe(tid INT)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE ans INT;
+
+    SELECT COUNT(*) 
+    INTO ans
+    FROM cultural_assets
+    WHERE tribe_id = tid;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 5. Write a function fn_longest_asset_desc() that returns the asset with the longest description.
+DELIMITER //
+
+CREATE FUNCTION fn_longest_asset_desc()
+RETURNS TEXT
+DETERMINISTIC
+BEGIN
+    DECLARE ans TEXT;
+
+    SELECT description 
+    INTO ans
+    FROM cultural_assets
+    ORDER BY CHAR_LENGTH(description) DESC
+    LIMIT 1;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 6. Create a function fn_shortest_asset_desc() that returns the asset with the shortest description.
+DELIMITER //
+
+CREATE FUNCTION fn_shortest_asset_desc()
+RETURNS TEXT
+DETERMINISTIC
+BEGIN
+    DECLARE ans TEXT;
+
+    SELECT description 
+    INTO ans
+    FROM cultural_assets
+    ORDER BY CHAR_LENGTH(description) ASC
+    LIMIT 1;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 7. Write a function fn_check_asset_exists(assetId INT) that returns 1 if the asset exists, else 0.
+DELIMITER //
+
+CREATE FUNCTION fn_asset_exist(aid INT)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE ans INT DEFAULT 0;
+
+    IF EXISTS (SELECT 1 FROM cultural_assets WHERE asset_id = aid) THEN
+        SET ans = 1;
+    END IF;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+-- 8. Create a function fn_asset_type_list() that returns all distinct asset types as a comma-separated list.
+DELIMITER //
+
+CREATE FUNCTION fn_asset_type_list()
+RETURNS TEXT
+DETERMINISTIC
+BEGIN
+    DECLARE ans TEXT;
+
+    SELECT GROUP_CONCAT(DISTINCT asset_type ORDER BY asset_type ASC SEPARATOR ', ')
+    INTO ans
+    FROM cultural_assets;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 9. Write a function fn_avg_asset_desc_size() that returns the average description length across assets.
+
+DELIMITER //
+
+CREATE FUNCTION fn_avg_asset_desc_size()
+RETURNS DECIMAL(10,2)
+DETERMINISTIC
+BEGIN
+    DECLARE ans DECIMAL(10,2);
+
+    SELECT AVG(CHAR_LENGTH(description)) 
+    INTO ans
+    FROM cultural_assets;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 10. Create a function fn_asset_word_count(assetId INT) that returns the number of words in a cultural asset description.
+
+DELIMITER //
+
+CREATE FUNCTION fn_asset_word_count(aid INT)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE ans INT;
+
+    SELECT LENGTH(description) - LENGTH(REPLACE(description,' ','')) + 1
+    INTO ans
+    FROM cultural_assets
+    WHERE asset_id = aid;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 8. cultural WORKSHOPS
+DELIMITER //
+
+CREATE FUNCTION fn_workshop_name(wid INT)
+RETURNS VARCHAR(100)
+DETERMINISTIC
+BEGIN
+    DECLARE ans VARCHAR(100);
+
+    SELECT workshop_name 
+    INTO ans
+    FROM cultural_workshops
+    WHERE workshop_id = wid;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+--  Returns the name of the workshop for a given workshop_id.
+-- type of workshop  for a given workshop.
+DELIMITER //
+
+CREATE FUNCTION fn_workshop_type(wid INT)
+RETURNS VARCHAR(100)
+DETERMINISTIC
+BEGIN
+    DECLARE ans VARCHAR(100);
+
+    SELECT workshop_type 
+    INTO ans
+    FROM cultural_workshops
+    WHERE workshop_id = wid;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 3. COUNT TOTAL WORKSHOPS
+DELIMITER //
+
+CREATE FUNCTION fn_count_workshops()
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE ans INT;
+
+    SELECT COUNT(*) 
+    INTO ans
+    FROM cultural_workshops;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 4. COUNT WORKSHOP BY SITE
+DELIMITER //
+
+CREATE FUNCTION fn_workshops_by_site(sid INT)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE ans INT;
+
+    SELECT COUNT(*) 
+    INTO ans
+    FROM cultural_workshops
+    WHERE site_id = sid;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 5. LONGEST WORKSHOP NAME
+DELIMITER //
+
+CREATE FUNCTION fn_longest_workshop_name()
+RETURNS VARCHAR(100)
+DETERMINISTIC
+BEGIN
+    DECLARE ans VARCHAR(100);
+
+    SELECT workshop_name
+    INTO ans
+    FROM cultural_workshops
+    ORDER BY CHAR_LENGTH(workshop_name) DESC
+    LIMIT 1;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 6. SHORTEST WORKSHOP NAME
+DELIMITER //
+
+CREATE FUNCTION fn_SHORTEST_workshop_name()
+RETURNS VARCHAR(100)
+DETERMINISTIC
+BEGIN
+    DECLARE ans VARCHAR(100);
+
+    SELECT workshop_name
+    INTO ans
+    FROM cultural_workshops
+    ORDER BY CHAR_LENGTH(workshop_name) asc
+    LIMIT 1;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- avg name length
+DELIMITER //
+
+CREATE FUNCTION fn_avg_workshop_name_size()
+RETURNS DECIMAL(10,2)
+DETERMINISTIC
+BEGIN
+    DECLARE ans DECIMAL(10,2);
+
+    SELECT AVG(CHAR_LENGTH(workshop_name)) 
+    INTO ans
+    FROM cultural_workshops;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 8. workshop size avg
+DELIMITER //
+
+CREATE FUNCTION fn_avg_workshop_desc_size()
+RETURNS DECIMAL(10,2)
+DETERMINISTIC
+BEGIN
+    DECLARE ans DECIMAL(10,2);
+
+    SELECT AVG(CHAR_LENGTH(description)) 
+    INTO ans
+    FROM cultural_workshops;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 9. if workshop exists 
+DELIMITER //
+
+CREATE FUNCTION fn_workshop_exist(wid INT)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE ans INT DEFAULT 0;
+
+    IF EXISTS (SELECT 1 FROM cultural_workshops WHERE workshop_id = wid) THEN
+        SET ans = 1;
+    END IF;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
+-- 10. count workshop by target audience
+DELIMITER //
+
+CREATE FUNCTION fn_workshops_by_target(target VARCHAR(100))
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE ans INT;
+
+    SELECT COUNT(*) 
+    INTO ans
+    FROM cultural_workshops
+    WHERE target_audience = target;
+
+    RETURN ans;
+END //
+
+DELIMITER ;
+
